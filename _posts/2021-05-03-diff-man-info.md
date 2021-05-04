@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "info和man的区别"
+title:  "info vs man"
 date:   2021-05-03
 categories: Linux
 ---
