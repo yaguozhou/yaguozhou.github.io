@@ -4,4 +4,4 @@ title: About
 permalink: /about/
 ---
 
-Hi
+Hi，I'm Yaguo Zhou.
