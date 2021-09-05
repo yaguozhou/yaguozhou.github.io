@@ -3,6 +3,7 @@ layout: post
 title:  "配置、编译、定制Linux Kernel"
 date:   2021-05-15
 categories: Linux
+github_comments_issueid: 1
 ---
 
 # 编译工具要求

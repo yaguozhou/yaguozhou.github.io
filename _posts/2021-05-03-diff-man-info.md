@@ -3,6 +3,7 @@ layout: post
 title:  "info vs man"
 date:   2021-05-03
 categories: Linux
+github_comments_issueid: 2
 ---
 
 # 概述
