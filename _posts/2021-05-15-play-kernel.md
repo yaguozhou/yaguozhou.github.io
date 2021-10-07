@@ -227,7 +227,9 @@ For further info see the ./README file
 - `make -j16`，把数字写成具体core数量的2倍
 - `make -j16 O=~/linux/tmp` 编译到指定目录
 
-我的笔记本cpu跑满，编译一把耗时 **40分钟**  `make -j16  17275.96s user 1426.30s system 768% cpu 40:32.52 total` 
+我的笔记本cpu跑满，编译一把耗时 **40分钟**  `make -j16`
+
+`17275.96s user 1426.30s system 768% cpu 40:32.52 total`
 
 - cpu： Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz， HT后8核
 - 内存： 16G
