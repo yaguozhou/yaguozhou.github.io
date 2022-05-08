@@ -67,6 +67,15 @@ kernel在1990年就实现了module化的编译，模块化driver可谓是linux�
 
 可以通过在目录`/etc/modprobe.d/`下新建文件，给module自动加载时自动带上参数
 
+#### 让module开机启动
+
+示例：新建`/etc/sysconfig/modules/br_netfilter.modules`，内容：
+
+```
+#!/bin/bash
+modprobe br_netfilte
+```
+
 ### 动手写一个简单的module
 
 hello.c
