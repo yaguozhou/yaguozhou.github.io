@@ -2,7 +2,7 @@
 layout: post
 title:  "配置、编译、定制Linux Kernel"
 date:   2021-05-15
-categories: Linux
+categories: kernel
 github_comments_issueid: 1
 ---
 
@@ -17,37 +17,33 @@ github_comments_issueid: 1
 
 - util-linux
   - 小工具集合，用来控制磁盘分区的创建、挂载等，里面包含很常见的命令，如fdisk、dmesg、mount、lscpu等
-- module-init-tools（kmod）
+- kmod（替代module-inibt-tools）
   - 使用kernel module会用到，里面会有lsmod、insmod、modprobe、depmod等
 - 文件系统相关
-  - ext2/3/4：e2fsprogs包，提供tune2fs之类的命令
-  - JFS： IBM的jfsutils包
-  - ReiserFS： reiserfsprogs包，在suse采用ext之前，reiserfs是默认的fs
-  - XFS： xfsprogs包，Silicon Graphics开发的，是某些linux的默认fs
-- 配额
-  - quota-tools包，使用kernel提供的配额功能
-- NFS
-  - nfs-utils包，挂载或运行nfs程序
+  - e2fsprogs： ext2/3/4相关，提供tune2fs之类的命令
+  - reiserfsprogs： ReiserFS包，在suse采用ext之前，reiserfs是默认的fs
+  - xfsprogs： XFS包，Silicon Graphics开发的，是某些linux发行版的默认fs
+  - jfsutils： IBM的JFS包
+- quota-tools：可以让你设定用户的配额，统计用户的使用额度
+- nfs-utils：挂载或运行nfs程序
 
 # 其他工具包
 
-- udev包
-  - udev被用来管理/dev目录
-- 进程管理包procps
-  - 包含ps、top等命令
+- udev：udev被用来管理/dev目录
+- procps-ng： 包含ps、top等命令
 
 # 源码下载
 
 从mirror下载会快点，不同版本自己改改url
 
-- `wget https://mirror.bjtu.edu.cn/kernel/linux/kernel/v5.x/linux-5.10.36.tar.xz`
+- `axel https://mirror.bjtu.edu.cn/kernel/linux/kernel/v5.x/linux-5.15.38.tar.xz`
 
 # make
 
 make有很多方便的target，`make help`已经很清晰了
 
 ```
-➜  linux-5.10.36 make help 
+~/mygit/linux (master ✔) make help 
 Cleaning targets:
   clean		  - Remove most generated files but keep the config and
                     enough build support to build external modules
@@ -74,6 +70,7 @@ Configuration targets:
   randconfig	  - New config with random answer to all options
   yes2modconfig	  - Change answers from yes to mod if possible
   mod2yesconfig	  - Change answers from mod to yes if possible
+  mod2noconfig	  - Change answers from mod to no if possible
   listnewconfig   - List new options
   helpnewconfig   - List new options and help text
   olddefconfig	  - Same as oldconfig but sets new symbols to their
@@ -143,10 +140,12 @@ Kernel packaging:
   targz-pkg           - Build the kernel as a gzip compressed tarball
   tarbz2-pkg          - Build the kernel as a bzip2 compressed tarball
   tarxz-pkg           - Build the kernel as a xz compressed tarball
-  perf-tar-src-pkg    - Build perf-5.10.36.tar source tarball
-  perf-targz-src-pkg  - Build perf-5.10.36.tar.gz source tarball
-  perf-tarbz2-src-pkg - Build perf-5.10.36.tar.bz2 source tarball
-  perf-tarxz-src-pkg  - Build perf-5.10.36.tar.xz source tarball
+  tarzst-pkg          - Build the kernel as a zstd compressed tarball
+  perf-tar-src-pkg    - Build perf-5.18.0-rc7.tar source tarball
+  perf-targz-src-pkg  - Build perf-5.18.0-rc7.tar.gz source tarball
+  perf-tarbz2-src-pkg - Build perf-5.18.0-rc7.tar.bz2 source tarball
+  perf-tarxz-src-pkg  - Build perf-5.18.0-rc7.tar.xz source tarball
+  perf-tarzst-src-pkg - Build perf-5.18.0-rc7.tar.zst source tarball
 
 Documentation targets:
  Linux kernel internal documentation in different formats from ReST:
@@ -162,26 +161,34 @@ Documentation targets:
   cleandocs       - clean all generated files
 
   make SPHINXDIRS="s1 s2" [target] Generate only docs of folder s1, s2
-  valid values for SPHINXDIRS are: PCI RCU accounting admin-guide arm arm64 block bpf cdrom core-api cpu-freq crypto dev-tools devicetree doc-guide driver-api fault-injection fb filesystems firmware-guide fpga gpu hid hwmon i2c ia64 ide iio infiniband input isdn kbuild kernel-hacking leds livepatch locking m68k maintainer mhi mips misc-devices netlabel networking openrisc parisc pcmcia power powerpc process riscv s390 scheduler scsi security sh sound sparc spi staging target timers trace translations usb userspace-api virt vm w1 watchdog x86 xtensa
+  valid values for SPHINXDIRS are: PCI RCU accounting admin-guide arc arm arm64 block bpf cdrom core-api cpu-freq crypto dev-tools devicetree doc-guide driver-api fault-injection fb filesystems firmware-guide fpga gpu hid hwmon i2c ia64 ide iio infiniband input isdn kbuild kernel-hacking leds livepatch locking m68k maintainer mhi mips misc-devices netlabel networking nios2 openrisc parisc pcmcia peci power powerpc process riscv s390 scheduler scsi security sh sound sparc spi staging target timers tools trace translations tty usb userspace-api virt vm w1 watchdog x86 xtensa
 
   make SPHINX_CONF={conf-file} [target] use *additional* sphinx-build
   configuration. This is e.g. useful to build with nit-picking config.
 
+  make DOCS_THEME={sphinx-theme} selects a different Sphinx theme.
+
+  make DOCS_CSS={a .css file} adds a DOCS_CSS override file for html/epub output.
+
   Default location for the generated documents is Documentation/output
 
 Architecture specific targets (x86):
-* bzImage      - Compressed kernel image (arch/x86/boot/bzImage)
-  install      - Install kernel using
-                  (your) ~/bin/installkernel or
-                  (distribution) /sbin/installkernel or
-                  install to $(INSTALL_PATH) and run lilo
-  fdimage      - Create 1.4MB boot floppy image (arch/x86/boot/fdimage)
-  fdimage144   - Create 1.4MB boot floppy image (arch/x86/boot/fdimage)
-  fdimage288   - Create 2.8MB boot floppy image (arch/x86/boot/fdimage)
-  isoimage     - Create a boot CD-ROM image (arch/x86/boot/image.iso)
-                  bzdisk/fdimage*/isoimage also accept:
-                  FDARGS="..."  arguments for the booted kernel
-                  FDINITRD=file initrd for the booted kernel
+* bzImage		- Compressed kernel image (arch/x86/boot/bzImage)
+  install		- Install kernel using (your) ~/bin/installkernel or
+			  (distribution) /sbin/installkernel or install to 
+			  $(INSTALL_PATH) and run lilo
+
+  fdimage		- Create 1.4MB boot floppy image (arch/x86/boot/fdimage)
+  fdimage144		- Create 1.4MB boot floppy image (arch/x86/boot/fdimage)
+  fdimage288		- Create 2.8MB boot floppy image (arch/x86/boot/fdimage)
+  hdimage		- Create a BIOS/EFI hard disk image (arch/x86/boot/hdimage)
+  isoimage		- Create a boot CD-ROM image (arch/x86/boot/image.iso)
+			  bzdisk/fdimage*/hdimage/isoimage also accept:
+			  FDARGS="..."  arguments for the booted kernel
+			  FDINITRD=file initrd for the booted kernel
+
+  kvm_guest.config	- Enable Kconfig items for running this kernel as a KVM guest
+  xen.config		- Enable Kconfig items for running this kernel as a Xen guest
 
   i386_defconfig              - Build for i386
   x86_64_defconfig            - Build for x86_64
@@ -200,7 +207,7 @@ Architecture specific targets (x86):
 		Multiple levels can be combined with W=12 or W=123
 
 Execute "make" or "make all" to build all targets marked with [*] 
-For further info see the ./README file        
+For further info see the ./README file 
 ```
 
 # 内核配置
@@ -209,7 +216,7 @@ For further info see the ./README file
 
 - `make oldconfig` 会认为.config是老kernel的，如果新kernel里的option没出现在.config里，就会提示，适合把老kernel的配置移植到新kernel
 - `make defconfig` 创建默认配置
-- `make menuconfig` 界面配置
+- `make menuconfig` 界面配置，如果zsh下执行时卡住，试试在bash下执行
 
     ![menuconfig](/img/menuconfig.png)
 
@@ -225,9 +232,11 @@ For further info see the ./README file
 # 编译
 
 - `make -j16`，把数字写成具体core数量的2倍
+  - 标记为Y的，最终会形成bzImage镜像文件 （可单独执行`make bzImage -j16`）
+  - 标记为M的，最终会形成.ko结尾的kernel module （可单独执行`make module -j16`）
 - `make -j16 O=~/linux/tmp` 编译到指定目录
 
-我的笔记本cpu跑满，编译一把耗时 **40分钟**  `make -j16`
+我的笔记本cpu跑满，编译一次耗时 **40分钟**  `make -j16`
 
 `17275.96s user 1426.30s system 768% cpu 40:32.52 total`
 
@@ -237,6 +246,18 @@ For further info see the ./README file
     ![make-j](/img/make-j-2.png)
 
     ![make-j](/img/make-j.png)
+
+- 加速编译
+  - make -jn： j（job），n（多进程）
+  - ccache： compiler cache，编译缓存，再次编译时会命中
+  - distcc： 多台机器并行编译
+
+- `sudo make install`  会做如下事情：
+    - 会将./arch/x86_64/boot/bzImage拷贝到/boot下，并重命名为vmlinuz-4.11.6
+    - 会将./System.map拷贝到/boot下，并重命名为System.map-4.11.6，这个文件中放的是内核的符号表，是个文本文件
+    - 会将./.config拷贝到/boot下，并重命名为config-4.11.6
+    - 会生成/boot/initramfs-4.11.6.img文件
+    - 会修改/boot/grub2/grub.cfg，将新内核加入到menuentry
 
 # 编译文档
 
@@ -344,5 +365,5 @@ For further info see the ./README file
 - 启动时（grub配置文件）
 - 运行时（/proc，/sys）
 
-全部参数见（v5.10.36）： [Documentation/admin-guide/kernel-parameters.txt](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/Documentation/admin-guide/kernel-parameters.txt?h=v5.10.36) 
+全部参数见（v5.15.38）： [Documentation/admin-guide/kernel-parameters.txt](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/Documentation/admin-guide/kernel-parameters.txt?h=v5.15.38) 
 
