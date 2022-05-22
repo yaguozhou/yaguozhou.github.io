@@ -2,7 +2,7 @@
 layout: post
 title:  "kernel module"
 date:   2021-09-25
-categories: Linux
+categories: kernel
 ---
 
 ## kernel threads
