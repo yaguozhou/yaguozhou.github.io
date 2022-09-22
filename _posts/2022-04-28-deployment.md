@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "应用部署策略"
+title:  "应用发布策略"
 date:   2022-04-28
 categories: ops
 ---
