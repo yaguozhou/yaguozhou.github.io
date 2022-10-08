@@ -7,18 +7,18 @@ categories: Linux
 
 # What
 
-是linux kernel的其中一种能力，就是某一些进程只能看见某一些资源
+是linux kernel的一种能力，就是让某一些进程只能看见某一些资源
 
 # 历史
 
 - 受Plan 9启发
-- 2002开始干，最初只有mount namespace，其他类型的namespace慢慢出来
+- 2002开始干，最初只有mount namespace，其他类型的namespace陆续出现
 
 # 种类
 
 共有8种namespace：
 
-- mount namespace
+- mount namespace： 可以有自己的文件系统
 - pid namespace： 在这个namespace里被创建的第一个进程就是1了
 - network namespace： 独立网络栈（独立的ip地址、路由表、socket、conn tracking table、fw）。一个新的namespace里只有lo口。interface可以在namespace间挪动。删除一个namespace时会销毁掉里面的virtual interface，而physical interface会被移回默认namespace
 - ipc namespace： 不同的namespace里的进程就不能使用共享内存互相通信了，就被隔离了
@@ -48,9 +48,9 @@ lrwxrwxrwx 1 zyg docker 0  9月22日 11:50 ipc -> 'ipc:[4026531839]'
 lrwxrwxrwx 1 zyg docker 0  9月22日 11:50 cgroup -> 'cgroup:[4026531835]'
 ```
 
-# 操纵namespace的syscall
+# 操纵namespace的方法
 
-- clone，用参数
-- unshare
-- setns
+- syscall：clone
+- 命令行：unshare
+- 函数：setns
 
