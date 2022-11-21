@@ -4,7 +4,7 @@
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Yaguo Zhou <yaguozhou@126.com>");
 MODULE_DESCRIPTION("my test driver");
-MODULE_SUPPORTED_DEVICE("testdevice");
+//MODULE_SUPPORTED_DEVICE("testdevice");
 
 static int __init  my_init_module(void)
 {

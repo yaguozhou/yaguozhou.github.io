@@ -11,6 +11,10 @@ OS的tasks都要靠kernel threads来执行，ps命令的输出中很容易能辨
 
 ![threads](/img/kernelthreads.png)
 
+## kernel tainted
+
+kernel一个重要的任务就是要硬件初始化，该工作主要靠driver，driver通常都是以module的形式被load进kernel。有一些硬件厂商不愿意开源它的driver。如果内核里揉入了闭源的driver，那么称kernel是tainted
+
 ## kernel的行为
 
 kernel通过几种方式来告诉我们它正在做什么，例如kernel写的log、/proc
@@ -24,6 +28,10 @@ kernel把最近的log保存在被称为kernel ring buffer的内存里，`dmesg`�
 ### /proc
 
 kernel通过`/proc`告诉你它的全部状态是什么，例如`cat /proc/meminfo`直接查看kernel告诉你的memory状态
+
+### uname， hostnamectl
+
+查看kernel版本
 
 ## kernel module
 
@@ -41,6 +49,8 @@ kernel在1990年就实现了module化的编译，模块化driver可谓是linux�
 - systemd-udevd不仅负责启动时硬件探测，而且持续地探测热插拔情况，通过`udevadm monitor`能查看到硬件变化的日志
 
 ### 管理kernel modules
+
+
 
 #### 自动载入
 
@@ -65,7 +75,12 @@ kernel在1990年就实现了module化的编译，模块化driver可谓是linux�
 
 #### 给module加参数
 
-可以通过在目录`/etc/modprobe.d/`下新建文件，给module自动加载时自动带上参数
+可以通过在目录`/etc/modprobe.d/`下新建文件，给module自动加载时自动带上参数，例如：
+
+```
+cat /etc/modprobe.d/alsa-base.conf
+options snd-hda-intel probe_mask=1
+```
 
 #### 让module开机启动
 
@@ -73,7 +88,7 @@ kernel在1990年就实现了module化的编译，模块化driver可谓是linux�
 
 ```
 #!/bin/bash
-modprobe br_netfilte
+modprobe br_netfilter
 ```
 
 ### 动手写一个简单的module
@@ -87,7 +102,6 @@ hello.c
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Yaguo Zhou <yaguozhou@126.com>");
 MODULE_DESCRIPTION("my test driver");
-MODULE_SUPPORTED_DEVICE("testdevice");
 
 static int __init  my_init_module(void)
 {
@@ -134,4 +148,15 @@ clean:
 
 ![insmod](/img/insmod.png)
 
-    如果想用modprobe加载module的话，
+如果想用modprobe加载module的话，会报：
+```
+> modprobe hello
+modprobe: FATAL: Module hello not found in directory /lib/modules/5.15.78-1-MANJARO
+```
+做法应该是：
+1. 将.ko文件拷贝到```/lib/module/`uname -r`(内核版本号)/kernel/driver/xxx```目录下
+   根据具体用途的区别分为net、ide、scsi、usb、video、parport、md、block、ata等，或者新建自己的目录
+2. `depmod -a`，更新模块依赖新，主要是更新modules.dep文件
+3. `modprobe hello`
+
+
